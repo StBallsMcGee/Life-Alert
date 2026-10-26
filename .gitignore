@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Deno lockfile created when type-checking edge functions
+deno.lock
