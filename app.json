@@ -23,7 +23,11 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./public/icons/favicon-32.png",
+      "name": "Stand Firm",
+      "shortName": "Stand Firm",
+      "themeColor": "#0E1726",
+      "backgroundColor": "#0E1726"
     },
     "plugins": [
       "expo-router",

@@ -5,6 +5,12 @@ everyone in your accountability circle gets a notification asking them to pray
 for you and reach out. They can tap **Pray** (you're notified that they're
 praying) or text/call you straight from the app.
 
+It runs two ways from the same code:
+
+- **Web app**: open a link in Safari and Add to Home Screen. No App Store and no
+  Apple Developer account, and it gets notifications on iOS 16.4+.
+- **Native app** for iOS and Android, built with Expo.
+
 > “If a man prevails against one who is alone, two shall withstand him; and a
 > threefold cord is not quickly broken.” — Ecclesiastes 4:12
 
@@ -28,9 +34,9 @@ praying) or text/call you straight from the app.
 
 | Part | Tech |
 | --- | --- |
-| App (iOS + Android) | Expo SDK 58, Expo Router, TypeScript |
+| App (web, iOS, Android) | Expo SDK 58, Expo Router, React Native Web, TypeScript |
 | Accounts, database | Supabase (Postgres with row level security) |
-| Push notifications | Expo push service, sent from Supabase Edge Functions |
+| Push notifications | Supabase Edge Functions send to both Expo push (native) and Web Push (web app) |
 
 ```
 src/app/                screens (Expo Router)
@@ -43,54 +49,86 @@ src/app/                screens (Expo Router)
   sign-in.tsx
 src/components/         hold button, verse carousel, alert card, UI kit
 src/lib/                Supabase client, auth, notifications, data helpers
+                        (*.web.ts files are the web versions)
+public/                 web app shell: index.html, manifest, service worker, icons
 supabase/migrations/    database schema + security rules
 supabase/functions/     send-alert, send-prayer (push notifications)
 ```
 
 ## Setup
 
-You need free accounts at [supabase.com](https://supabase.com) and
-[expo.dev](https://expo.dev), plus Node.js 20+.
+You need a free account at [supabase.com](https://supabase.com) and Node.js 20+.
 
-### 1. Supabase
+### 1. Supabase (the backend)
 
 1. Create a new Supabase project.
-2. Install the CLI (`npm i -g supabase`), then from this folder:
+2. Make a key pair for web notifications (VAPID keys). Keep the private key secret:
+   ```sh
+   npx web-push generate-vapid-keys
+   ```
+3. Install the CLI (`npm i -g supabase`), then from this folder:
    ```sh
    supabase login
    supabase link --project-ref <your-project-ref>
    supabase db push                 # creates the tables and security rules
+   supabase secrets set VAPID_PUBLIC_KEY=<public key> VAPID_PRIVATE_KEY=<private key> \
+     VAPID_SUBJECT=mailto:<your email>
    supabase functions deploy send-alert
    supabase functions deploy send-prayer
    ```
-3. Optional, for easier testing: in **Authentication → Sign In / Providers →
+   `VAPID_SUBJECT` must be a real `mailto:` address, or Apple rejects the notifications.
+4. Optional, for easier testing: in **Authentication → Sign In / Providers →
    Email**, turn off **Confirm email**. Otherwise new users must click the link
    in their confirmation email before signing in.
 
-### 2. The app
+Then copy the environment file and fill it in:
 
 ```sh
 npm install
-cp .env.example .env.local   # paste your Supabase URL and anon key
-npx eas-cli@latest init      # links an Expo project; needed for push tokens
+cp .env.example .env.local   # Supabase URL + anon key, and the VAPID *public* key
 ```
 
-Push notifications need a real device and a **development build** (Expo Go
-can't receive remote notifications on Android):
+### 2a. Web app (iPhone Home Screen), no App Store needed
 
 ```sh
+npm run build:web            # writes the site to dist/
+```
+
+Put `dist/` on any HTTPS host. The easiest is **Netlify Drop**: go to
+<https://app.netlify.com/drop> and drag the `dist` folder onto the page. You
+get a link like `https://stand-firm-123.netlify.app`. (`dist/_redirects`
+makes links like `/alert/<id>` work there. `vercel.json` does the same for
+Vercel.) Run `npm run build:web` and upload again whenever you change the app.
+
+**On each iPhone** (iOS 16.4 or newer):
+
+1. Open the link in **Safari** and sign up.
+2. Tap the **Share** button, then **Add to Home Screen**.
+3. Open **Stand Firm from the Home Screen icon** (not Safari) and tap **Turn on
+   notifications**, then **Allow**.
+
+The app shows these steps itself if someone opens it in a Safari tab.
+Notifications only arrive in the Home Screen version. That's an iOS rule. On
+Android and desktop, Chrome can get notifications without installing.
+
+### 2b. Native app (optional)
+
+```sh
+npx eas-cli@latest init      # links an Expo project; needed for push tokens
 npx eas-cli@latest build --profile development --platform android   # or ios
 npx expo start
 ```
 
-For iOS push you also need an Apple Developer account; `eas build` walks you
-through creating the push key. Change `ios.bundleIdentifier` and
-`android.package` in `app.json` from `com.example.standfirm` to your own first.
+Push notifications need a real device and a development build. Expo Go can't
+receive remote notifications on Android. For iOS you also need an Apple Developer
+account, and `eas build` walks you through creating the push key. Change
+`ios.bundleIdentifier` and `android.package` in `app.json` from
+`com.example.standfirm` to your own first.
 
 ### 3. Try it
 
 Sign up on two phones, create a circle on one, join it with the code on the
-other, then hold the button.
+other, then hold the button. Web and native users can be in the same circle.
 
 ## Before you release
 
@@ -98,11 +136,13 @@ other, then hold the button.
 - The name "Life Alert" is a registered trademark of an emergency-response
   company, which is why the app is called Stand Firm here. Rename it in
   `app.json` if you like.
-- Add an app icon and splash image in `assets/images/`.
+- The web app has an icon (`public/icons/`). For the native app, add an icon and
+  splash image in `assets/images/`.
 
 ## Development
 
 ```sh
-npx tsc --noEmit                                          # typecheck the app
-npx deno check supabase/functions/*/index.ts              # typecheck functions
+npx tsc --noEmit                                                  # typecheck the app
+npx deno check --node-modules-dir=none supabase/functions/*/index.ts  # typecheck functions
+npx expo start --web                                              # run the web app locally
 ```

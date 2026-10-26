@@ -1,8 +1,9 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Body, Button, Card, Field } from '@/components/ui';
+import { confirmAction, shareText, showMessage } from '@/lib/dialog';
 import { useAuth } from '@/lib/auth';
 import { createCircle, fetchCircles, joinCircle, leaveCircle, type CircleWithMembers } from '@/lib/circles';
 import { colors, fonts, spacing } from '@/lib/theme';
@@ -20,7 +21,7 @@ export default function CirclesScreen() {
     try {
       setCircles(await fetchCircles());
     } catch (e) {
-      Alert.alert('Could not load circles', (e as Error).message);
+      showMessage('Could not load circles', (e as Error).message);
     }
   }, []);
 
@@ -36,22 +37,23 @@ export default function CirclesScreen() {
       await action();
       await load();
     } catch (e) {
-      Alert.alert('Something went wrong', (e as Error).message);
+      showMessage('Something went wrong', (e as Error).message);
     } finally {
       setBusy(null);
     }
   };
 
   const invite = (c: CircleWithMembers) =>
-    Share.share({
-      message: `Join my accountability circle "${c.name}" on Stand Firm. Use invite code: ${c.invite_code}`,
-    });
+    shareText(`Join my accountability circle "${c.name}" on Stand Firm. Use invite code: ${c.invite_code}`);
 
-  const leave = (c: CircleWithMembers) =>
-    Alert.alert(`Leave ${c.name}?`, 'You will stop getting and sending alerts with this circle.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Leave', style: 'destructive', onPress: () => run('join', () => leaveCircle(c.id, myId)) },
-    ]);
+  const leave = async (c: CircleWithMembers) => {
+    const ok = await confirmAction(
+      `Leave ${c.name}?`,
+      'You will stop getting and sending alerts with this circle.',
+      'Leave',
+    );
+    if (ok) run('join', () => leaveCircle(c.id, myId));
+  };
 
   return (
     <ScrollView

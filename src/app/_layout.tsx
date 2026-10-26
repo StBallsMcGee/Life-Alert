@@ -11,6 +11,9 @@ import { useNotificationRouting } from '@/lib/use-notification-routing';
 
 SplashScreen.preventAutoHideAsync();
 
+// Opening an alert straight from a notification still puts the tabs underneath it.
+export const unstable_settings = { anchor: '(tabs)' };
+
 const theme = {
   ...DarkTheme,
   colors: {

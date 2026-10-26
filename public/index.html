@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Stand Firm</title>
+    <meta name="description" content="Ask your brothers for prayer the moment temptation hits." />
+
+    <!-- Installable web app (Add to Home Screen) -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0E1726" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Stand Firm" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+        background-color: #0e1726;
+      }
+      body {
+        overflow: hidden;
+        /* Feel like an app: no tap flash, and no text-selection or callout menu when holding the button */
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        overscroll-behavior: none;
+      }
+      input,
+      textarea {
+        -webkit-user-select: text;
+        user-select: text;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run Stand Firm.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

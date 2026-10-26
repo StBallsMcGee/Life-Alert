@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card } from '@/components/ui';
+import { showMessage } from '@/lib/dialog';
 import { fetchAlert, resolveAlert, type AlertRow } from '@/lib/alerts';
 import { colors, fonts, spacing } from '@/lib/theme';
 
@@ -40,7 +41,7 @@ export default function SentScreen() {
     try {
       await resolveAlert(alertId);
     } catch (e) {
-      Alert.alert('Could not update', (e as Error).message);
+      showMessage('Could not update', (e as Error).message);
     }
     router.back();
   };

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { openUrl, showMessage } from '@/lib/dialog';
 import { pray, timeAgo, type AlertRow } from '@/lib/alerts';
 import { colors, fonts, spacing } from '@/lib/theme';
 
@@ -22,7 +23,7 @@ export function AlertCard({ alert, myId, onChanged, showPrayers }: Props) {
       await pray(alert.id);
       onChanged();
     } catch (e) {
-      Alert.alert('Could not send', (e as Error).message);
+      showMessage('Could not send', (e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -73,13 +74,13 @@ export function AlertCard({ alert, myId, onChanged, showPrayers }: Props) {
                 label="Text"
                 variant="outline"
                 icon={{ ios: 'message.fill', android: 'sms', web: 'sms' }}
-                onPress={() => Linking.openURL(`sms:${phone}`)}
+                onPress={() => openUrl(`sms:${phone}`)}
               />
               <Button
                 label="Call"
                 variant="outline"
                 icon={{ ios: 'phone.fill', android: 'call', web: 'call' }}
-                onPress={() => Linking.openURL(`tel:${phone}`)}
+                onPress={() => openUrl(`tel:${phone}`)}
               />
             </>
           ) : null}

@@ -1,0 +1,2 @@
+# Netlify: serve the app for every path so links like /alert/<id> work.
+/*    /index.html   200

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Field } from '@/components/ui';
+import { showMessage } from '@/lib/dialog';
 import { supabase } from '@/lib/supabase';
 import { colors, fonts, spacing } from '@/lib/theme';
 
@@ -29,12 +30,12 @@ export default function SignInScreen() {
         });
         if (error) throw error;
         if (!data.session) {
-          Alert.alert('Check your email', 'Confirm your email address, then sign in.');
+          showMessage('Check your email', 'Confirm your email address, then sign in.');
           setMode('sign-in');
         }
       }
     } catch (e) {
-      Alert.alert('Could not continue', (e as Error).message);
+      showMessage('Could not continue', (e as Error).message);
     } finally {
       setLoading(false);
     }

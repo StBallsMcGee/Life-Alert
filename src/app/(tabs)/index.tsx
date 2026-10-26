@@ -1,10 +1,12 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { HoldButton } from '@/components/hold-button';
+import { NotificationPrompt } from '@/components/notification-prompt';
 import { Button, Field } from '@/components/ui';
 import { VerseCarousel } from '@/components/verse-carousel';
+import { showMessage } from '@/lib/dialog';
 import { sendAlert } from '@/lib/alerts';
 import { fetchCircles } from '@/lib/circles';
 import type { Circle } from '@/lib/supabase';
@@ -24,7 +26,7 @@ export default function HomeScreen() {
           // Default to alerting every circle.
           setSelected(new Set(list.map((c) => c.id)));
         })
-        .catch((e) => Alert.alert('Could not load circles', e.message));
+        .catch((e) => showMessage('Could not load circles', e.message));
     }, []),
   );
 
@@ -38,7 +40,7 @@ export default function HomeScreen() {
 
   const send = async () => {
     if (selected.size === 0) {
-      Alert.alert('Choose a circle', 'Select at least one circle to alert.');
+      showMessage('Choose a circle', 'Select at least one circle to alert.');
       return;
     }
     setSending(true);
@@ -47,7 +49,7 @@ export default function HomeScreen() {
       setNote('');
       router.push({ pathname: '/sent', params: { alertId: alert_id, notified: String(notified) } });
     } catch (e) {
-      Alert.alert('Alert not sent', (e as Error).message);
+      showMessage('Alert not sent', (e as Error).message);
     } finally {
       setSending(false);
     }
@@ -58,6 +60,7 @@ export default function HomeScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <NotificationPrompt />
         <VerseCarousel />
 
         <HoldButton onConfirm={send} busy={sending} disabled={noCircles} />

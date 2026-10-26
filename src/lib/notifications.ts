@@ -45,3 +45,8 @@ export async function registerForPushNotifications(userId: string): Promise<stri
   await supabase.from('push_tokens').upsert({ user_id: userId, token, updated_at: new Date().toISOString() });
   return token;
 }
+
+/** Called before sign-out so this device stops getting the user's alerts. */
+export async function unregisterPushNotifications(userId: string) {
+  await supabase.from('push_tokens').delete().eq('user_id', userId);
+}

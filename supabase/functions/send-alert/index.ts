@@ -1,5 +1,5 @@
 // Sends a "please pray for me" alert to every member of the chosen circles.
-import { adminClient, corsHeaders, displayName, json, sendPush, tokensFor, userClient } from '../_shared/util.ts';
+import { adminClient, corsHeaders, displayName, json, notifyUsers, userClient } from '../_shared/util.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -52,17 +52,13 @@ Deno.serve(async (req) => {
 
   const recipients = [...new Set(members.map((m) => m.user_id as string))];
   const name = await displayName(admin, user.id);
-  const tokens = await tokensFor(admin, recipients);
 
   // Kept discreet: this text can show on a lock screen.
-  await sendPush(
-    tokens.map((to) => ({
-      to,
-      title: `${name} needs backup 🙏`,
-      body: `${name} is asking for prayer right now. Tap to pray and reach out.`,
-      data: { alertId: alert.id },
-    })),
-  );
+  await notifyUsers(admin, recipients, {
+    title: `${name} needs backup 🙏`,
+    body: `${name} is asking for prayer right now. Tap to pray and reach out.`,
+    data: { alertId: alert.id },
+  });
 
   return json({ alert_id: alert.id, notified: recipients.length });
 });

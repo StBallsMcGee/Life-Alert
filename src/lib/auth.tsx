@@ -1,7 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { registerForPushNotifications } from './notifications';
+import { registerForPushNotifications, unregisterPushNotifications } from './notifications';
 import { supabase, type Profile } from './supabase';
 
 type AuthState = {
@@ -9,6 +9,7 @@ type AuthState = {
   profile: Profile | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState>({
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthState>({
   profile: null,
   loading: true,
   refreshProfile: async () => {},
+  signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -48,7 +50,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (userId) registerForPushNotifications(userId).catch((e) => console.warn('Push setup failed', e));
   }, [userId, refreshProfile]);
 
-  return <AuthContext.Provider value={{ session, profile, loading, refreshProfile }}>{children}</AuthContext.Provider>;
+  const signOut = useCallback(async () => {
+    if (userId) await unregisterPushNotifications(userId).catch((e) => console.warn('Push cleanup failed', e));
+    await supabase.auth.signOut();
+  }, [userId]);
+
+  return (
+    <AuthContext.Provider value={{ session, profile, loading, refreshProfile, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);

@@ -1,5 +1,5 @@
 // Records "I'm praying" on an alert and lets the person who sent it know.
-import { adminClient, corsHeaders, displayName, json, sendPush, tokensFor, userClient } from '../_shared/util.ts';
+import { adminClient, corsHeaders, displayName, json, notifyUsers, userClient } from '../_shared/util.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -26,15 +26,11 @@ Deno.serve(async (req) => {
   const { data: alert } = await admin.from('alerts').select('user_id').eq('id', alert_id).single();
   if (alert && alert.user_id !== user.id) {
     const name = await displayName(admin, user.id);
-    const tokens = await tokensFor(admin, [alert.user_id]);
-    await sendPush(
-      tokens.map((to) => ({
-        to,
-        title: `${name} is praying for you`,
-        body: 'You are not alone. Stand firm.',
-        data: { alertId: alert_id },
-      })),
-    );
+    await notifyUsers(admin, [alert.user_id], {
+      title: `${name} is praying for you`,
+      body: 'You are not alone. Stand firm.',
+      data: { alertId: alert_id },
+    });
   }
 
   return json({ ok: true });
