@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+html, body { background: #131419; }
+/* Phones: the page never scrolls sideways. Content is designed to fit; this is the safety net. */
+html, body { max-width: 100%; overflow-x: clip; }
+body { @apply text-gray-900 antialiased; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+img, svg, video { max-width: 100%; }
+
+@layer components {
+  /* Bright pastel gradient tiles (the reference's "match cards"); text on them is charcoal. */
+  .tile-blue { @apply bg-gradient-to-br from-[#8fb6ff] to-[#5f86f7] text-charcoal; }
+  .tile-violet { @apply bg-gradient-to-br from-[#c3adff] to-[#8f7bff] text-charcoal; }
+  .tile-green { @apply bg-gradient-to-br from-[#7fe0a6] to-[#33b980] text-charcoal; }
+  .tile-orange { @apply bg-gradient-to-br from-[#ffc785] to-[#ff8a5c] text-charcoal; }
+  .tile-teal { @apply bg-gradient-to-br from-[#7fe8de] to-[#3fb6e8] text-charcoal; }
+  .tile-pink { @apply bg-gradient-to-br from-[#ffa6c4] to-[#ff7096] text-charcoal; }
+  .tile-gold { @apply bg-gradient-to-br from-[#ffe08a] to-[#f9b42e] text-charcoal; }
+  .card { @apply mx-3 rounded-2xl bg-surface shadow-lg shadow-black/20 sm:mx-0; }
+  .btn { @apply inline-flex min-h-[40px] items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-gradient-to-r from-gold-400 to-orange-400 text-charcoal shadow-lg shadow-orange-500/20 hover:brightness-105; }
+  .btn-secondary { @apply btn border border-gray-200 bg-surface-2 text-gray-900 hover:bg-surface-3; }
+  .btn-ghost { @apply btn text-gray-600 hover:bg-gray-100; }
+  .btn-danger { @apply btn bg-red-500 text-white hover:bg-red-400; }
+  .input { @apply w-full rounded-xl border border-gray-200 bg-surface-2 px-3 py-2 text-base text-gray-900 placeholder:text-gray-400 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30 sm:text-sm; }
+  .label { @apply mb-1 block text-xs font-bold uppercase tracking-wide text-gray-500; }
+  .table { @apply w-full text-left text-sm; }
+  .table th { @apply whitespace-nowrap border-b border-gray-100 bg-surface-2 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-gray-500; }
+  .table td { @apply whitespace-nowrap px-3 py-2.5; }
+  .table tbody tr { @apply border-t border-gray-100; }
+  .link { @apply font-semibold text-gold-300 hover:underline; }
+  .section-title { @apply px-4 pb-1 pt-4 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 sm:px-0; }
+}
+
+/* Taps feel physical: links and buttons dip slightly while pressed. */
+a, button, summary { transition: transform .12s ease, background-color .15s ease, color .15s ease, box-shadow .15s ease; }
+button:not(.absolute):not(.fixed):active:not(:disabled), summary:active { transform: scale(.97); }
+/* Collapsible panels (e.g. Filters) grow open instead of snapping. */
+details[open] > :not(summary) { animation: grow .2s cubic-bezier(.2,.8,.2,1) both; transform-origin: top; }
+@keyframes grow { from { opacity: 0; transform: scaleY(.9); } to { opacity: 1; transform: none; } }
+
+/* People who ask their phone for less motion get none. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Home field scene: your lineup lines up on the field and drifts; a football spirals between them. */
+.fb-player { animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+@keyframes fb-drift-1 { 0% { transform: translate(-50%, -50%); } 50% { transform: translate(calc(-50% + 7px), calc(-50% - 5px)); } 100% { transform: translate(calc(-50% - 5px), calc(-50% + 4px)); } }
+@keyframes fb-drift-2 { 0% { transform: translate(calc(-50% + 4px), -50%); } 50% { transform: translate(calc(-50% - 6px), calc(-50% + 5px)); } 100% { transform: translate(calc(-50% + 3px), calc(-50% - 6px)); } }
+@keyframes fb-drift-3 { 0% { transform: translate(-50%, calc(-50% + 5px)); } 50% { transform: translate(calc(-50% + 5px), calc(-50% + 1px)); } 100% { transform: translate(calc(-50% - 6px), calc(-50% - 4px)); } }
+/* The ball: snap to the QB, a deep pass to WR1, back for a handoff and a run, then a field goal
+   through the posts. Positions match the formation spots in field-scene.tsx. */
+.fb-ball { animation: fb-ball 12s infinite; }
+@keyframes fb-ball {
+  0%    { left: 29%; top: 50%; opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); animation-timing-function: ease-out; }
+  8%    { left: 24%; top: 50%; transform: translate(-50%, -50%) rotate(-20deg) scale(1); animation-timing-function: ease-in-out; }
+  24%   { left: 47%; top: 14%; transform: translate(-50%, -50%) rotate(700deg) scale(1.35); animation-timing-function: ease-out; }
+  32%   { left: 62%; top: 16%; transform: translate(-50%, -50%) rotate(720deg) scale(1); animation-timing-function: ease-in-out; }
+  42%   { left: 29%; top: 50%; transform: translate(-50%, -50%) rotate(720deg) scale(1); animation-timing-function: ease-out; }
+  48%   { left: 19%; top: 64%; transform: translate(-50%, -50%) rotate(760deg) scale(1); animation-timing-function: ease-in-out; }
+  62%   { left: 56%; top: 72%; transform: translate(-50%, -50%) rotate(800deg) scale(1); animation-timing-function: ease-out; }
+  72%   { left: 12%; top: 50%; transform: translate(-50%, -50%) rotate(800deg) scale(1); animation-timing-function: ease-in; }
+  90%   { left: 95%; top: 50%; transform: translate(-50%, -50%) rotate(1160deg) scale(1.5); animation-timing-function: ease-out; }
+  95%   { left: 97%; top: 50%; opacity: .15; transform: translate(-50%, -50%) rotate(1180deg) scale(.6); }
+  100%  { left: 29%; top: 50%; opacity: 1; transform: translate(-50%, -50%) rotate(1440deg) scale(1); }
+}
+
+/* Matchup totals: the points just gained float up above the total and fade. */
+.score-gain { animation: score-gain 2.4s cubic-bezier(.2,.8,.2,1) forwards; opacity: 0; }
+@keyframes score-gain {
+  0%   { opacity: 0;    transform: translate(-50%, 6px) scale(.9); }
+  15%  { opacity: .45;  transform: translate(-50%, -14px) scale(1.05); }
+  70%  { opacity: .35;  transform: translate(-50%, -26px) scale(1); }
+  100% { opacity: 0;    transform: translate(-50%, -36px) scale(1); }
+}

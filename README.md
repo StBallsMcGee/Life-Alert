@@ -146,3 +146,9 @@ npx tsc --noEmit                                                  # typecheck th
 npx deno check --node-modules-dir=none supabase/functions/*/index.ts  # typecheck functions
 npx expo start --web                                              # run the web app locally
 ```
+
+---
+
+## Also in this repository: THE MINIDOME
+
+[`minidome/`](minidome/) is a separate Next.js app: private NFL playoff One-and-Done fantasy leagues. See [minidome/README.md](minidome/README.md).
